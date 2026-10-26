@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------
+   THEME TOKENS
+   Colors are space-separated RGB channels so Tailwind opacity
+   modifiers keep working (e.g. text-fg/60, from-brand-violet).
+   html[data-theme="dark" | "light"] is set before first paint by
+   the inline script in app/layout.js.
+------------------------------------------------------------------- */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --fg: 244 244 248;
+  --c1: 139 92 246; /* violet */
+  --c2: 236 72 153; /* pink   */
+  --c3: 251 146 60; /* orange */
+
+  --page-bg: #0b0b14;
+  --page-glow-a: rgba(139, 92, 246, 0.28);
+  --page-glow-b: rgba(236, 72, 153, 0.2);
+  --page-glow-c: rgba(251, 146, 60, 0.14);
+
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-hover: rgba(255, 255, 255, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* "Sunset candy": blue -> magenta-pink -> orange. Going through pink keeps the gradient vivid instead of muddy. */
+  --fg: 38 25 66;
+  --c1: 37 99 235; /* electric blue */
+  --c2: 219 39 119; /* raspberry pink */
+  --c3: 249 115 22; /* tangerine */
+
+  --page-bg: #fff5ec;
+  --page-glow-a: rgba(251, 146, 60, 0.45); /* peach-orange, top left */
+  --page-glow-b: rgba(96, 165, 250, 0.42); /* sky blue, top right */
+  --page-glow-c: rgba(244, 114, 182, 0.38); /* candy pink, bottom */
+
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-hover: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-border-hover: #ffffff;
+  --glass-shadow: 0 12px 40px rgba(219, 39, 119, 0.14), 0 3px 12px rgba(37, 99, 235, 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Global background lives here, components never set their own page background */
+body {
+  min-height: 100vh;
+  color: rgb(var(--fg));
+  font-family: var(--font-body), sans-serif;
+  background-color: var(--page-bg);
+  background-image:
+    radial-gradient(60rem 40rem at 10% -10%, var(--page-glow-a), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 10%, var(--page-glow-b), transparent 60%),
+    radial-gradient(50rem 40rem at 50% 110%, var(--page-glow-c), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* light theme: an extra soft lilac haze mid-page so the pastel background feels layered, not flat */
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(60rem 40rem at 10% -10%, var(--page-glow-a), transparent 60%),
+    radial-gradient(50rem 40rem at 100% 10%, var(--page-glow-b), transparent 60%),
+    radial-gradient(40rem 30rem at 0% 60%, rgba(167, 139, 250, 0.26), transparent 65%),
+    radial-gradient(50rem 40rem at 50% 110%, var(--page-glow-c), transparent 60%);
+}
+
+::selection {
+  background: rgb(var(--c2) / 0.4);
+}
+
+/* /work explorer: page itself must not scroll */
+html.no-scroll,
+html.no-scroll body {
+  overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* ---- infinite marquee ---- */
+.marquee-track {
+  animation: marquee 40s linear infinite;
+  will-change: transform;
+}
+.marquee-pausable:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation-play-state: paused;
+  }
+}
+
+/* outlined display text (works in both themes) */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(var(--fg) / 0.35);
+}
+
+@layer components {
+  .glass {
+    @apply border backdrop-blur-xl;
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Lighter than .glass: no backdrop blur, safe to use dozens of times inside 3D-transformed layers */
+  .card-flat {
+    background: var(--glass-bg-hover);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-hover {
+    @apply transition duration-300 hover:-translate-y-1;
+  }
+  .glass-hover:hover {
+    background: var(--glass-bg-hover);
+    border-color: var(--glass-border-hover);
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-violet via-brand-pink to-brand-orange bg-clip-text text-transparent;
+  }
+
+  .btn-gradient {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-violet via-brand-pink to-brand-orange px-7 py-3 text-sm font-semibold text-white transition duration-300 hover:scale-[1.04];
+  }
+  .btn-gradient:hover {
+    box-shadow: 0 0 30px rgb(var(--c2) / 0.45);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-fg/20 bg-fg/5 px-7 py-3 text-sm font-semibold text-fg backdrop-blur-md transition duration-300 hover:bg-fg/10;
+  }
+
+  .section {
+    @apply mx-auto w-full max-w-6xl px-5 py-16 md:py-32;
+  }
+
+  .eyebrow {
+    @apply mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-brand-pink;
+  }
+}
+
+/* tilted carousel: gentler on phones so cards stay readable and inside the screen */
+.work-tilt {
+  transform: rotateX(8deg) rotateZ(-2.5deg) scale(1.04);
+  transform-origin: 50% 50%;
+}
+@media (min-width: 640px) {
+  .work-tilt {
+    transform: rotateX(14deg) rotateZ(-4deg) scale(1.1);
+  }
+}
+
+/* horizontal swipe rows on phones (journey, testimonials) */
+.snap-row {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-row::-webkit-scrollbar {
+  display: none;
+}
